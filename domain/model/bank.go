@@ -2,16 +2,20 @@ package model
 
 import "time"
 import "github.com/satori/go.uuid"
+import "github.com/asaskevich/govalidator"
 
 type Bank struct {
-	ID        string    `json:"id"`
-	Code      string    `json:"code"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Base `valid:"requied"`
+	Code string `json:"code" valid:"notnull"`
+	Name string `json:"name" valid:"notnull"`
 }
 
 func (receiver *Bank) validator() error {
+	_, error := govalidator.ValidateStruct(receiver)
+
+	if error != nil {
+		return error
+	}
 	return nil
 }
 
@@ -21,10 +25,10 @@ func NewBank(code string, name string) (*Bank, error) {
 	bank.ID = uuid.NewV4().String()
 	bank.CreatedAt = time.Now()
 
-	error := bank.validator()
+	err := bank.validator()
 
-	if error != nil {
-		return nil, error
+	if err != nil {
+		return nil, err
 	}
 	return &bank, nil
 }
